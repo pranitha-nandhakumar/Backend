@@ -14,7 +14,7 @@ app.use(cors());
 
 // MongoDB connection
 mongoose
-  .connect("mongodb://localhost:27017/seceDec2025")
+  .connect("mongodb+srv://pranithanandhakumar_db_user:prani%40123@cluster0.wysuaim.mongodb.net/?appName=Cluster0")
   .then(() => console.log("MongoDB connection successful"))
   .catch(err => console.log("MongoDB connection unsuccessful:", err));
 
