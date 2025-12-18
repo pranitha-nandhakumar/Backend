@@ -2,8 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
-const path = require('path');
-const User = require('./models/SignupSchema'); // User model
+const User = require('./models/SignupSchema'); // Mongoose User model
 
 const app = express();
 const PORT = 8001;
@@ -14,15 +13,16 @@ app.use(cors());
 
 // MongoDB connection
 mongoose
-  .connect("mongodb+srv://pranithanandhakumar_db_user:prani%40123@cluster0.wysuaim.mongodb.net/?appName=Cluster0")
+  .connect("mongodb+srv://pranithanandhakumar_db_user:prani%40123@cluster0.wysuaim.mongodb.net/seceDB?retryWrites=true&w=majority")
   .then(() => console.log("MongoDB connection successful"))
   .catch(err => console.log("MongoDB connection unsuccessful:", err));
 
-// Test routes
+// Test route
 app.get('/', (req, res) => {
   res.send("Welcome to backend server");
 });
 
+// JSON test route
 app.get('/json', (req, res) => {
   res.json({
     college: "SECE",
@@ -31,53 +31,40 @@ app.get('/json', (req, res) => {
   });
 });
 
+
+// Get all users
+app.get('/getallsignup', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching users", error: err });
+  }
+});
+
 // ================= SIGNUP =================
 app.post("/signup", async (req, res) => {
   try {
-    console.log(req.body);
-
     const { name, email, password } = req.body;
 
-    // Validation
     if (!name || !email || !password) {
-      return res.status(400).json({
-        message: "All fields are required",
-        isSignup: false
-      });
+      return res.status(400).json({ message: "All fields are required", isSignup: false });
     }
 
-    // Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({
-        message: "Email already registered",
-        isSignup: false
-      });
+      return res.status(400).json({ message: "Email already registered", isSignup: false });
     }
 
-    // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Save user
-    const newUser = new User({
-      name,
-      email,
-      password: hashedPassword
-    });
-
+    const newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
 
-    res.status(201).json({
-      message: "Signup Successful",
-      isSignup: true
-    });
-
+    res.status(201).json({ message: "Signup Successful", isSignup: true });
   } catch (error) {
     console.error("Signup Error:", error);
-    res.status(500).json({
-      message: "Signup failed",
-      isSignup: false
-    });
+    res.status(500).json({ message: "Signup failed", isSignup: false });
   }
 });
 
@@ -88,31 +75,18 @@ app.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({
-        message: "User not found",
-        isLoggedIn: false
-      });
+      return res.status(404).json({ message: "User not found", isLoggedIn: false });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({
-        message: "Invalid password",
-        isLoggedIn: false
-      });
+      return res.status(401).json({ message: "Invalid password", isLoggedIn: false });
     }
 
-    res.status(200).json({
-      message: "Login successful",
-      isLoggedIn: true
-    });
-
+    res.status(200).json({ message: "Login successful", isLoggedIn: true });
   } catch (error) {
     console.error("Login Error:", error);
-    res.status(500).json({
-      message: "Login failed",
-      isLoggedIn: false
-    });
+    res.status(500).json({ message: "Login failed", isLoggedIn: false });
   }
 });
 
@@ -120,3 +94,4 @@ app.post("/login", async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server started successfully on port ${PORT}`);
 });
+
