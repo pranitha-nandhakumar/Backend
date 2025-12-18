@@ -2,18 +2,23 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 const cors = require('cors');
-const User = require('./models/SignupSchema'); // Mongoose User model
-
+const User = require('./models/SignupSchema'); 
+const dotenv= require('dotenv');
 const app = express();
 const PORT = 8001;
+dotenv.config();
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 
+
 // MongoDB connection
 mongoose
-  .connect("mongodb+srv://pranithanandhakumar_db_user:prani%40123@cluster0.wysuaim.mongodb.net/seceDB?retryWrites=true&w=majority")
+  .connect(process.env.MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  } )
   .then(() => console.log("MongoDB connection successful"))
   .catch(err => console.log("MongoDB connection unsuccessful:", err));
 
